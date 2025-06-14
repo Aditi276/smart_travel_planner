@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Travel Planner - Dehradun</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #FFE66D;
+            --dark-color: #2C3E50;
+            --light-color: #F7F9FC;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-color);
+        }
+
+        .navbar {
+            background: var(--dark-color);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            color: var(--accent-color);
+            font-size: 1.8em;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .main-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #FF8E8E 100%);
+            padding: 120px 20px 60px;
+            color: white;
+            margin-top: 60px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        .title-section {
+            flex: 1;
+        }
+
+        .title-section h1 {
+            font-size: 3.5em;
+            margin: 0;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .title-section p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .features-list {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .features-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .features-list li {
+            margin: 15px 0;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .features-list li::before {
+            content: "✨";
+            font-size: 1.2em;
+        }
+
+        .cta-button {
+            background: var(--accent-color);
+            color: var(--dark-color);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .cta-button:hover {
+            background: #FFD93D;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .locations-section {
+            padding: 80px 20px;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            color: var(--dark-color);
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: var(--secondary-color);
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .location-card {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            background: white;
+        }
+
+        .location-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .location-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .location-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 20px;
+        }
+
+        .location-info h3 {
+            margin: 0;
+            font-size: 1.5em;
+            color: white;
+        }
+
+        .location-info p {
+            margin: 10px 0 0 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 900px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            .title-section h1 {
+                font-size: 2.5em;
+            }
+            .features-list {
+                width: 100%;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="/" class="logo">Smart Travel Planner</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="{{ url_for('login') }}">Login</a>
+                <!-- <a href="{{ url_for('register') }}">Register</a> -->
+                <a href="#locations">Locations</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="main-header">
+        <div class="header-content">
+            <div class="title-section">
+                <h1>Discover Dehradun</h1>
+                <p>Plan your journeys smarter, faster, and easier! Find the shortest routes, estimate travel time, and explore Dehradun with ease.</p>
+                <a href="{{ url_for('login') }}" class="cta-button">Get Started</a>
+            </div>
+            <div class="features-list">
+                <ul>
+                    <li>Find the shortest route between any two locations</li>
+                    <li>Interactive map with real road routes</li>
+                    <li>Accurate distance and time estimates</li>
+                    <li>Secure login and registration</li>
+                    <li>Explore popular places in Dehradun</li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <section id="locations" class="locations-section">
+        <h2 class="section-title">Explore Dehradun's Famous Locations</h2>
+        <div class="locations-grid">
+            <div class="location-card">
+                <img src="{{ url_for('static', filename='images/robber_cave.jpg') }}" alt="Robber's Cave">
+                <div class="location-info">
+                    <h3>Robber's Cave</h3>
+                    <p>A natural cave formation with a stream flowing through it</p>
+                </div>
+            </div>
+            <div class="location-card">
+                <img src="{{ url_for('static', filename='images/sahastradhara.jpg') }}" alt="Sahastradhara">
+                <div class="location-info">
+                    <h3>Sahastradhara</h3>
+                    <p>Famous for its sulphur water springs and beautiful waterfalls</p>
+                </div>
+            </div>
+            <div class="location-card">
+                <img src="{{ url_for('static', filename='images/FRI.jpg') }}" alt="Forest Research Institute">
+                <div class="location-info">
+                    <h3>Forest Research Institute</h3>
+                    <p>Colonial architecture and beautiful botanical gardens</p>
+                </div>
+            </div>
+            <div class="location-card">
+                <img src="{{ url_for('static', filename='images/malsi_deer_park.jpg') }}" alt="Malsi Deer Park">
+                <div class="location-info">
+                    <h3>Malsi Deer Park</h3>
+                    <p>Home to various species of deer and other wildlife</p>
+                </div>
+            </div>
+            <div class="location-card">
+                <img src="{{ url_for('static', filename='images/tapkeshwar.jpg') }}" alt="Tapkeshwar Temple">
+                <div class="location-info">
+                    <h3>Tapkeshwar Temple</h3>
+                    <p>Ancient cave temple dedicated to Lord Shiva</p>
+                </div>
+            </div>
+            <div class="location-card">
+                <img src="{{ url_for('static', filename='images/buddha_temple.jpg') }}" alt="Buddha Temple">
+                <div class="location-info">
+                    <h3>Buddha Temple</h3>
+                    <p>Peaceful temple with beautiful architecture</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main App Content -->
+    <div id="app-section" class="hidden">
+        <header>
+            <h1>Smart Travel Planner</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </header>
+
+        <div class="route-planner">
+            <div class="route-left">
+                <div class="dropdown-input">
+                    <label for="source">Select source location</label>
+                    <select id="source"></select>
+                </div>
+                <div class="dropdown-input">
+                    <label for="destination">Select destination location</label>
+                    <select id="destination"></select>
+                </div>
+                <button class="primary-btn" onclick="findRoute()">Get Shortest Path</button>
+
+                <div id="route-info" class="route-info hidden">
+                    <h3>Route Information</h3>
+                    <p>Distance: <span id="distance"></span></p>
+                    <p>Estimated Time: <span id="time"></span></p>
+                    <p>Fuel Budget: <span id="fuel-budget"></span></p>
+                </div>
+                <div id="weather-info">
+                    <!-- Weather info will be loaded here -->
+                </div>
+            </div>
+            <div class="route-right">
+                <div id="map">
+                    <!-- Loading Spinner Overlay -->
+                    <div id="loading-spinner" class="hidden">
+                        <img src="{{ url_for('static', filename='images/loading.gif') }}" alt="Loading...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
