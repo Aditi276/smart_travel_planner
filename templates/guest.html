@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Travel Planner - Guest Access</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Add Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .route-info {
+            margin-bottom: 20px;
+        }
+        .weather-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Smart Travel Planner</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/login">Login</a>
+                <a class="nav-link" href="/register">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Plan Your Route</h5>
+                        <form id="routeForm">
+                            <div class="mb-3">
+                                <label for="source" class="form-label">Source</label>
+                                <select class="form-select" id="source" required>
+                                    <option value="">Select source location</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="destination" class="form-label">Destination</label>
+                                <select class="form-select" id="destination" required>
+                                    <option value="">Select destination location</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Find Route</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Route Details</h5>
+                        <div id="routeDetails">
+                            <p class="text-muted">Enter source and destination to see route details</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Route Map</h5>
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([30.3165, 78.0322], 13); // Dehradun coordinates
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Store markers and polyline
+        let markers = [];
+        let routeLine = null;
+
+        // Fetch available locations and populate dropdowns
+        fetch('/locations')
+            .then(response => response.json())
+            .then(locations => {
+                const sourceSelect = document.getElementById('source');
+                const destSelect = document.getElementById('destination');
+                
+                locations.forEach(location => {
+                    sourceSelect.add(new Option(location, location));
+                    destSelect.add(new Option(location, location));
+                });
+            });
+
+        // Handle form submission
+        document.getElementById('routeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const source = document.getElementById('source').value;
+            const destination = document.getElementById('destination').value;
+
+            // Clear previous markers and route
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            if (routeLine) {
+                map.removeLayer(routeLine);
+                routeLine = null;
+            }
+
+            fetch('/route', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    source: source,
+                    destination: destination
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('routeDetails').innerHTML = `
+                        <div class="alert alert-danger">${data.error}</div>
+                    `;
+                    return;
+                }
+
+                // Display route details
+                document.getElementById('routeDetails').innerHTML = `
+                    <div class="route-info">
+                        <p><strong>Distance:</strong> ${data.distance} km</p>
+                        <p><strong>Estimated Time:</strong> ${data.time}</p>
+                        <p><strong>Fuel Budget:</strong> ₹${data.fuel_budget}</p>
+                        <p><strong>Route:</strong> ${data.path.join(' → ')}</p>
+                    </div>
+                    <div class="weather-info mt-3">
+                        <h6>Weather Information</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <p><strong>Source (${source}):</strong></p>
+                                ${data.weather.source ? `
+                                    <p>Temperature: ${data.weather.source.temperature}°C</p>
+                                    <p>Conditions: ${data.weather.source.description}</p>
+                                ` : '<p>Weather data unavailable</p>'}
+                            </div>
+                            <div class="col-6">
+                                <p><strong>Destination (${destination}):</strong></p>
+                                ${data.weather.destination ? `
+                                    <p>Temperature: ${data.weather.destination.temperature}°C</p>
+                                    <p>Conditions: ${data.weather.destination.description}</p>
+                                ` : '<p>Weather data unavailable</p>'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <p class="text-muted">Note: To save routes and access more features, please <a href="/login">login</a> or <a href="/register">register</a>.</p>
+                    </div>
+                `;
+
+                // Add markers for source and destination
+                const sourceMarker = L.marker(data.polyline_coords[0]).addTo(map)
+                    .bindPopup(`<b>Source:</b> ${source}`);
+                const destMarker = L.marker(data.polyline_coords[data.polyline_coords.length - 1]).addTo(map)
+                    .bindPopup(`<b>Destination:</b> ${destination}`);
+                
+                markers.push(sourceMarker, destMarker);
+
+                // Draw the route
+                routeLine = L.polyline(data.polyline_coords, {
+                    color: 'blue',
+                    weight: 3,
+                    opacity: 0.7
+                }).addTo(map);
+
+                // Fit map to show the entire route
+                map.fitBounds(routeLine.getBounds(), {
+                    padding: [50, 50]
+                });
+            })
+            .catch(error => {
+                document.getElementById('routeDetails').innerHTML = `
+                    <div class="alert alert-danger">Error: ${error.message}</div>
+                `;
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
