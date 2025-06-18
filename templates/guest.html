@@ -6,7 +6,7 @@
     <title>Smart Travel Planner - Guest Access</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Add Leaflet CSS -->
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         #map {
@@ -42,17 +42,18 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Plan Your Route</h5>
+                        <h6 class="card-title">*To get a personalized experience please register.*</h6>
                         <form id="routeForm">
                             <div class="mb-3">
                                 <label for="source" class="form-label">Source</label>
                                 <select class="form-select" id="source" required>
-                                    <option value="">Select source location</option>
+                                    <option value="">Select your source location</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="destination" class="form-label">Destination</label>
                                 <select class="form-select" id="destination" required>
-                                    <option value="">Select destination location</option>
+                                    <option value="">Select your destination location</option>
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-primary">Find Route</button>
@@ -83,20 +84,20 @@
         </div>
     </div>
 
-    <!-- Add Leaflet JS -->
+    
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        // Initialize map
-        const map = L.map('map').setView([30.3165, 78.0322], 13); // Dehradun coordinates
+       
+        const map = L.map('map').setView([30.3165, 78.0322], 13); 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Store markers and polyline
+       
         let markers = [];
         let routeLine = null;
 
-        // Fetch available locations and populate dropdowns
+  
         fetch('/locations')
             .then(response => response.json())
             .then(locations => {
@@ -109,14 +110,14 @@
                 });
             });
 
-        // Handle form submission
+      
         document.getElementById('routeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const source = document.getElementById('source').value;
             const destination = document.getElementById('destination').value;
 
-            // Clear previous markers and route
+            
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
             if (routeLine) {
@@ -143,7 +144,7 @@
                     return;
                 }
 
-                // Display route details
+             
                 document.getElementById('routeDetails').innerHTML = `
                     <div class="route-info">
                         <p><strong>Distance:</strong> ${data.distance} km</p>
@@ -175,7 +176,7 @@
                     </div>
                 `;
 
-                // Add markers for source and destination
+                
                 const sourceMarker = L.marker(data.polyline_coords[0]).addTo(map)
                     .bindPopup(`<b>Source:</b> ${source}`);
                 const destMarker = L.marker(data.polyline_coords[data.polyline_coords.length - 1]).addTo(map)
@@ -183,14 +184,14 @@
                 
                 markers.push(sourceMarker, destMarker);
 
-                // Draw the route
+              
                 routeLine = L.polyline(data.polyline_coords, {
                     color: 'blue',
                     weight: 3,
                     opacity: 0.7
                 }).addTo(map);
 
-                // Fit map to show the entire route
+                
                 map.fitBounds(routeLine.getBounds(), {
                     padding: [50, 50]
                 });
