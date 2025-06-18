@@ -26,7 +26,7 @@ mongo = PyMongo(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# User class for Flask-Login
+
 class User(UserMixin):
     def __init__(self, user_data):
         self.id = str(user_data['_id'])
@@ -40,7 +40,7 @@ def load_user(user_id):
         return User(user_data)
     return None
 
-# Keep your existing coordinates and graph definitions
+
 coordinates = {
     'Forest Research Institute': (30.3547, 77.9470),
     'Paltan Bazaar': (30.3252, 78.0430),
@@ -60,7 +60,6 @@ coordinates = {
     'Tapkeshwar Temple': (30.3342, 78.0081),
 }
 
-# Keep your existing base_graph and other graph-related functions
 base_graph = {
     'Forest Research Institute': {'Paltan Bazaar': 1, 'ISBT Dehradun': 1, 'Pacific Mall': 1},
     'Paltan Bazaar': {'Forest Research Institute': 1, 'ISBT Dehradun': 1, 'Clock Tower': 1, 'Gandhi Park': 1},
@@ -80,7 +79,6 @@ base_graph = {
     'Tapkeshwar Temple': {'Gandhi Park': 1},
 }
 
-# Keep your existing graph-related functions
 def build_real_distance_graph(base_graph, coordinates):
     real_graph = {}
     for src, neighbors in base_graph.items():
@@ -94,7 +92,6 @@ def build_real_distance_graph(base_graph, coordinates):
 graph = build_real_distance_graph(base_graph, coordinates)
 location_map = {name: name for name in coordinates.keys()}
 
-# Keep your existing dijkstra and other utility functions
 def dijkstra(graph, start, end):
     distances = {node: float('inf') for node in graph}
     previous = {node: None for node in graph}
@@ -120,7 +117,6 @@ def dijkstra(graph, start, end):
     else:
         return float('inf'), []
 
-# Update your routes to use MongoDB
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -185,7 +181,6 @@ def delete_favorite_route(route_id):
         return jsonify({'message': 'Route removed from favorites'}), 200
     return jsonify({'error': 'Route not found'}), 404
 
-# Keep your existing route-related functions and endpoints
 def get_weather_data(location_name):
     try:
         coord = coordinates.get(location_name)
@@ -261,7 +256,6 @@ def fuel_price(distance, petrol_price_per_litre=100, mileage=40):
     petrol_consumption_total_price = both_distance_petrol_consumption * petrol_price_per_litre
     return round(petrol_consumption_total_price, 2)
 
-# Keep your existing route endpoints
 @app.route('/')
 def home():
     return render_template('home.html')
